@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "utils.h"
+
 using namespace std;
 
 struct ProgramState {
@@ -15,29 +17,9 @@ struct ProgramState {
   vector<int> program;
 };
 
-vector<int> getProgram() {
-  vector<int> vec;
-  std::ifstream in("day2-input.txt");
-  std::string line;
-
-  if(!in) {
-    cerr << "Cannot open the File : " << endl;
-  }
-
-  while(getline(in, line, ',')) {
-    if (line.size() > 0) {
-      vec.push_back(stoi(line));
-    }
-  }
-  in.close();
-  return vec;
-}
-
 ProgramState runProgram(ProgramState state) {
   auto code = state.program[state.position];
-  auto nextState = state;
-  nextState.lastCode = code;
-  nextState.position = state.position + 4;
+  state.lastCode = code;
   switch(code) {
       case 1 :
       case 2 : {
@@ -47,11 +29,12 @@ ProgramState runProgram(ProgramState state) {
         int valAtPos2 = state.program[pos2];
         int pos3 = state.program[state.position + 3];
         int result = (code == 1) ? valAtPos1 + valAtPos2 : valAtPos1 * valAtPos2;
-        nextState.program[pos3] = result;
-        return nextState;
+        state.program[pos3] = result;
+        state.position = state.position + 4;
+        return state;
       }
       case 99 : {
-        return nextState;
+        return state;
       }
       default :
          throw runtime_error("Bad Code");
@@ -69,7 +52,7 @@ int runProgramWithInputs(int noun, int verb, vector<int> program) {
 }
 
 int main() {
-  auto program = getProgram();
+  auto program = getProgram("day2-input.txt");
   vector<int> testProgram{ 1,9,10,3,2,3,11,0,99,30,40,50 };
 
   cout << runProgramWithInputs(12, 2, program) << endl;
@@ -80,13 +63,17 @@ int main() {
   int end = 19690720;
 
   for (auto noun : range1) {
+    int result;
     for (auto verb : range2) {
-      auto result = runProgramWithInputs(noun, verb, program);
+      result = runProgramWithInputs(noun, verb, program);
       if (result == end) {
         cout << noun << endl;
         cout << verb << endl;
         break;
       }
+    }
+    if (result == end) {
+      break;
     }
   }
 
