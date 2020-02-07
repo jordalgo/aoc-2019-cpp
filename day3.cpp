@@ -77,11 +77,13 @@ Coordinate getNextCoordinate(Coordinate start, std::string instruction) {
   }
 }
 
-bool isLineVertical(Line line) {
-  return line.start.x == line.end.x;
+bool isLineVertical(const Line* line) {
+  return line->start.x == line->end.x;
 }
 
-bool doLinesIntersect(Line line1, Line line2) {
+int c = 0;
+
+bool doLinesIntersect(const Line* line1, const Line* line2) {
   const auto line1IsVertical(isLineVertical(line1));
   const auto line2IsVertical(isLineVertical(line2));
   if (line1IsVertical && line2IsVertical) {
@@ -92,25 +94,25 @@ bool doLinesIntersect(Line line1, Line line2) {
 
   return (
       (
-       (verticalLine.start.y >= horizontalLine.start.y
-        && verticalLine.end.y <= horizontalLine.end.y)
+       (verticalLine->start.y >= horizontalLine->start.y
+        && verticalLine->end.y <= horizontalLine->end.y)
        ||
-       (verticalLine.start.y <= horizontalLine.start.y
-        && verticalLine.end.y >= horizontalLine.end.y))
+       (verticalLine->start.y <= horizontalLine->start.y
+        && verticalLine->end.y >= horizontalLine->end.y))
       &&
       (
-        (verticalLine.start.x >= horizontalLine.start.x
-         && verticalLine.start.x <= horizontalLine.end.x)
+        (verticalLine->start.x >= horizontalLine->start.x
+         && verticalLine->start.x <= horizontalLine->end.x)
         ||
-        (verticalLine.start.x <= horizontalLine.start.x 
-         && verticalLine.start.x >= horizontalLine.end.x)));
+        (verticalLine->start.x <= horizontalLine->start.x 
+         && verticalLine->start.x >= horizontalLine->end.x)));
 }
 
-vector<IntersectingLines> getIntersectingLines(Path path1, Path path2) {
+vector<IntersectingLines> getIntersectingLines(const Path* path1, const Path* path2) {
   vector<IntersectingLines> intersectingLines;
-  for (auto line1 : path1) {
-    for (auto line2: path2) {
-      if (doLinesIntersect(line1, line2)) {
+  for (auto line1 : *path1) {
+    for (auto line2: *path2) {
+      if (doLinesIntersect(&line1, &line2)) {
         intersectingLines.push_back({line1, line2});
       }
     }
@@ -171,7 +173,7 @@ int main() {
   wirePaths.resize(wires.size());
   std::transform (instructions.begin(), instructions.end(), wirePaths.begin(), getLines);
 
-  auto intersectingLines = getIntersectingLines(wirePaths[0], wirePaths[1]);
+  auto intersectingLines = getIntersectingLines(&wirePaths[0], &wirePaths[1]);
   vector<Coordinate> intersectionPoints;
   intersectionPoints.resize(intersectingLines.size());
 
